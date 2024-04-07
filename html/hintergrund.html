@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<title>Hintergrund - Solarwichtel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="Keywords" content="Solarwichtel, Solar, Balkonkraftwerk, Shelly, Steckdose">
+<meta name="Description" content="Solarwichtel - Nutzen Sie den Strom Ihres Balkonkraftwerks selbst, wo auch immer Sie wohnen. Deutschlandweit. Automatisiert.">
+<link rel="stylesheet" href="/external/stylesheets.css">
+</head>
+
+<body>
+<nav class="w3-border-bottom w3-blue-gray">
+    <div class="w3-content w3-container w3-display-container w3-bar">
+        <div class="w3-bar-item w3-left w3-mobile">
+           <a href="/" style="padding:0;text-decoration:none;" class="w3-xlarge w3-bar-item w3-mobile"><img src="/img/w30.png" style="height:30px;margin-bottom:6px;" class="w3-middle" alt=""> Solarwichtel</a>
+        </div>
+        
+        <div class="w3-bar-item w3-right w3-mobile">
+            <a href="/" class="w3-button">Startseite</a>
+            <a href="/einrichten" class="w3-button">Einrichten</a>
+            <a href="/hintergrund.html" class="w3-button">Hintergrund</a>
+            <a href="/kontakt.html" class="w3-button">Kontakt / Impressum</a>
+        </div>
+    </div>
+</nav>
+
+<div class="w3-content w3-padding-64 w3-container">
+<h1>Was machen wir?</h1>
+<p>Intelligente Steckdosen dienen dazu, Geräte im Haushalt zu schalten. Wir nutzen ihre Fähigkeit, sich mit einem Webserver zu verbinden, um von dort ein Signal zum Ein- oder Ausschalten zu erhalten. Gerade Shelly-Steckdosen unterstützen das sehr gut und sind weit verfügbar, deshalb nutzen wir sie hier.</p>
+<p>Darauf basiert unser "Solarwichtel":</p>
+<p>Aus den Satellitendaten des Deutschen Wetterdienstes bestimmen wir die Sonneneinstrahlung an jedem Punkt in Deutschland. Ihre Shelly-Steckdose verbindet sich mit unserem solarwichtel.de-Server, z.B. "Ich höre auf Signale für die Stadt XY".
+Unser Server holt jede Viertelstunde die aktuellen Satellitendaten und prüft dann für jede Stadt: "Welche Steckdosen haben sich für diese Postleitzahl angemeldet?"
+Scheint die Sonne hell genug, wird an alle Steckdosen, die sich für eine Postleitzahl angemeldet haben, der Befehl "Einschalten" gesendet. </p>
+
+<p>Der Ablauf sieht so aus:</p>
+<ol>
+<li>Der Deutsche Wetterdienst stellt Strahlungsdaten bereit</li>
+<li>Wir laden diese Daten herunter und prüfen für jeden Ort mit einem Schwellwert, ob es hell genug ist</li>
+<li>Die Steckdosen erhalten von uns ein Signal "Einschalten" oder "Ausschalten".</li>
+</ol>
+
+<p>Warum brauche ich das? Kann ich nicht zu Hause an meinem eigenen Balkonmodul den Strom messen und damit viel flexibler Steckdosen schalten?</p>
+<p>Natürlich! Unser Angebot richtet sich jedoch an Menschen, die keine Smart-Home-Zentrale zu Hause einrichten wollen, sondern eine einfache Lösung suchen.</p>
+
+<hr>
+
+<h1>Für Interessierte:</h1>
+
+<p>Der Deutsche Wetterdienst stellt Daten auf opendata.dwd.de bereit.</p>
+<p>Wir nutzen <a href="https://opendata.dwd.de/weather/satellite/radiation/sis/">opendata.dwd.de/weather/satellite/radiation/sis/</a>, da</p>
+<p><blockquote>
+"Die Globalstrahlung (SIS) ist der Strahlungsfluss, welcher auf eine horizontale Einheitsfläche des Erdbodens im Spektralbereich von 0.2-4 µm Wellenlänge einfällt. Die Einheit ist W/m2. Die Globalstrahlung ist die wichtigste Eingangsgröße zur Bestimmung der elektrischen Leistung von PV Anlagen."
+</blockquote>
+(<a href="https://www.dwd.de/DE/leistungen/fernerkund_globalstrahlung_sis/fernerkund_globalstrahlung_sis.html">dwd.de/DE/leistungen/fernerkund_globalstrahlung_sis/fernerkund_globalstrahlung_sis.html</a>)</p>
+
+<p>Das SIS-Array entspricht einem Gitter, das für jedes Koordinatenpaar in 0.05-Grad-Schritten (ca. 6 Kilometer) die Strahlungsintensität in Watt pro Quadratmeter angibt.
+Diese Werte spannen etwa von 0 - 800 W/m², als Schwellwert zum Einschalten haben wir 400 W/m² festgelegt.</p>
+<img src="/img/sis_matplotlib.png">
+<p>Der Anzeigewert auf der Webseite entspricht der geschätzten aktuellen Leistung eines 600-Watt-Balkonmoduls.</p>
+
+<p>Für das komfortable Auswählen der Stadt gibt es eine Datenbank mit Postleitzahlen (ursprünglich von <a href="https://www.wiwald.com/ds/kostenlose-liste-deutscher-postleitzahlen-und-zugehoeriger-orte/id/ww-german-postal-codes">wiwald.com/ds/kostenlose-liste-deutscher-postleitzahlen-und-zugehoeriger-orte/id/ww-german-postal-codes</a>)</p>
+<img src="/img/database.png">
+<p>In der Spalte "exist" wird gespeichert, ob dieser Shelly auf solarwichtel.de aktiviert wurde.</p>
+
+<p>Für den Shelly-Name solarwichtel_XXXX_XXXX werden Längen- und Breitengrad jeder Postleitzahl auf 0.05 gerundet. Dadurch fallen oft mehrere Orte und Postleitzahlen in dieselbe Koordinate.
+Sie werden aber dennoch getrennt aufgeführt, um bei der Autovervollständigung im Suchfeld besser gefunden zu werden.</p>
+
+<p>Um die Signale an die Shelly-Steckdosen zu übermitteln, läuft auf dem Server auch ein MQTT-Broker.
+Bei MQTT werden Nachrichten über Topics organisiert: Ein Gerät wie unsere Steckdose meldet sich an und bekundet sein Interesse an einem bestimmten Topic (subscribe).
+In unserem Fall existiert je ein Topic für jede aktive Koordinate.
+Die Shellys haben darauf nur Lesezugriff, so dass niemand von außen Steckdosen schalten kann.</p>
+
+<p>Ein zentrales Python-Skript liest nun jede Viertelstunde die aktuelle Sonnendaten von opendata.dwd.de. Es sendet für jede aktive Adresse eine Nachricht zum "Einschalten" oder "Ausschalten" (publish).
+Der MQTT-Broker führt eine Liste, welche verbundenen Shells sich für dieses Topic registriert haben. Er leitet die Nachricht an die gewünschten Geräte weiter.</p>
+
+<p>Und die Webseite?<br>
+...ist einfaches HTML, mit w3.css und jQuery UI für das Suchfeld.</p>
+
+<p>Der Quellcode ist auf <a href="https://github.com/s12wu/solarwichtel">github.com/s12wu/solarwichtel</a> zu finden.</p>
+</div>
+
+
+<footer class="w3-container w3-dark-gray w3-padding-8 w3-border-top">
+    <p class="w3-small">Solarwichtel, März - April 2024. <a href="kontakt.html">Impressum und Datenschutz</a></p>
+</footer>
+</body>
+</html>
