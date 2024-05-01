@@ -80,7 +80,13 @@ newest_file = ""
 def check_new_file():
     global directory, newest_file
 
-    names = os.listdir(directory)
+    try:
+        names = os.listdir(directory)
+    except FileNotFoundError:
+        print("data unavailable, trying again in 30 minutes...")
+        time.sleep(30*60)
+        return None
+
     names = [file for file in names if file.startswith("SISin") and file.endswith("DEv3.nc")]
 
     # the file names have a timestamp, after sorting the newest one ist always last
